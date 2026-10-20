@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>btc-seed — BTC Seed Generator for Windows</title>
+<style>
+  :root{
+    --bg-0:#05070f;
+    --bg-1:#0a0f24;
+    --bg-2:#121a3a;
+    --indigo:#4f46e5;
+    --indigo-lt:#818cf8;
+    --cyan:#22d3ee;
+    --violet:#a855f7;
+    --amber:#f59e0b;
+    --text:#e6e9f5;
+    --muted:#98a2c4;
+    --line:rgba(129,140,248,0.18);
+    --card:rgba(255,255,255,0.035);
+    --radius:16px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1200px 700px at 80% -10%, rgba(79,70,229,0.35), transparent 60%),
+      radial-gradient(900px 600px at 5% 10%, rgba(34,211,238,0.14), transparent 55%),
+      radial-gradient(1000px 800px at 50% 120%, rgba(168,85,247,0.18), transparent 60%),
+      linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;text-decoration:none;}
+
+  .wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky;top:0;z-index:100;
+    backdrop-filter:blur(16px) saturate(160%);
+    -webkit-backdrop-filter:blur(16px) saturate(160%);
+    background:rgba(10,15,36,0.62);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    height:68px;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem;letter-spacing:.2px;}
+  .brand-mark{
+    width:32px;height:32px;border-radius:9px;
+    display:grid;place-items:center;font-size:1rem;
+    background:linear-gradient(135deg,var(--indigo),var(--violet));
+    box-shadow:0 0 18px rgba(129,140,248,0.55);
+  }
+  .brand span{background:linear-gradient(90deg,#fff,#a5b4fc);-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  .nav-links{display:flex;align-items:center;gap:28px;font-size:.92rem;color:var(--muted);}
+  .nav-links a{transition:color .2s ease;}
+  .nav-links a:hover{color:#fff;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font-weight:600;font-size:.94rem;border-radius:12px;
+    padding:11px 20px;border:1px solid transparent;
+    cursor:pointer;transition:transform .18s ease, box-shadow .25s ease, background .25s ease, border-color .2s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--indigo) 0%,var(--violet) 100%);
+    color:#fff;
+    box-shadow:0 8px 26px -8px rgba(99,102,241,0.85);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px -8px rgba(129,140,248,0.95);}
+  .btn-ghost{
+    background:rgba(255,255,255,0.04);
+    border-color:rgba(129,140,248,0.35);
+    color:#dbe0f5;
+  }
+  .btn-ghost:hover{background:rgba(129,140,248,0.12);transform:translateY(-2px);border-color:rgba(129,140,248,0.7);}
+  .btn-lg{padding:15px 30px;font-size:1rem;border-radius:14px;}
+  .nav .btn{padding:9px 18px;font-size:.88rem;}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:88px 0 68px;text-align:center;position:relative;}
+  .pill{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:7px 16px;border-radius:999px;
+    font-size:.8rem;font-weight:600;letter-spacing:.4px;
+    color:#c7d2fe;
+    background:rgba(79,70,229,0.14);
+    border:1px solid rgba(129,140,248,0.4);
+    box-shadow:0 0 22px -6px rgba(129,140,248,0.6) inset;
+    margin-bottom:26px;
+  }
+  .pill .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--cyan);box-shadow:0 0 10px var(--cyan);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+
+  h1{
+    font-size:clamp(2.1rem, 5.4vw, 3.9rem);
+    line-height:1.12;
+    letter-spacing:-1.2px;
+    font-weight:800;
+    margin-bottom:22px;
+    background:linear-gradient(100deg,#ffffff 0%,#c7d2fe 35%,#818cf8 62%,#22d3ee 100%);
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;
+  }
+  .hero p.lead{
+    max-width:660px;margin:0 auto 38px;
+    color:var(--muted);font-size:clamp(.98rem,1.6vw,1.12rem);
+  }
+  .hero-actions{
+    display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:52px;
+  }
+
+  .stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    max-width:820px;margin:0 auto;
+  }
+  .stat{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 12px;
+    backdrop-filter:blur(8px);
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .stat:hover{transform:translateY(-3px);border-color:rgba(129,140,248,0.45);}
+  .stat b{display:block;font-size:1.05rem;color:#fff;letter-spacing:.2px;}
+  .stat small{display:block;font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+
+  /* ---------- SECTION HEADS ---------- */
+  .section{padding:78px 0;}
+  .section-head{text-align:center;margin-bottom:48px;}
+  .section-head .kicker{
+    font-size:.76rem;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;
+    color:var(--indigo-lt);margin-bottom:12px;
+  }
+  .section-head h2{
+    font-size:clamp(1.55rem,3.4vw,2.25rem);
+    font-weight:800;letter-spacing:-.6px;color:#fff;margin-bottom:12px;
+  }
+  .section-head p{color:var(--muted);max-width:560px;margin:0 auto;font-size:.97rem;}
+
+  /* ---------- FEATURES ---------- */
+  .grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+  }
+  .card{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px 24px 26px;
+    backdrop-filter:blur(10px);
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--indigo),var(--violet),var(--cyan));
+    opacity:.9;
+  }
+  .card:hover{
+    transform:translateY(-7px);
+    border-color:rgba(129,140,248,0.5);
+    background:rgba(255,255,255,0.06);
+    box-shadow:0 22px 46px -20px rgba(79,70,229,0.75);
+  }
+  .card .ico{
+    display:grid;place-items:center;
+    width:46px;height:46px;border-radius:12px;font-size:1.35rem;
+    background:rgba(79,70,229,0.16);
+    border:1px solid rgba(129,140,248,0.28);
+    margin-bottom:18px;
+  }
+  .card h3{font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:9px;letter-spacing:-.2px;}
+  .card p{font-size:.9rem;color:var(--muted);}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{position:relative;max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:34px;}
+  .steps::before{
+    content:"";position:absolute;left:27px;top:14px;bottom:14px;width:2px;
+    background:linear-gradient(180deg,var(--indigo),var(--violet),var(--cyan));
+    opacity:.65;border-radius:2px;
+  }
+  .step{display:flex;gap:24px;align-items:flex-start;position:relative;}
+  .step .num{
+    flex:0 0 56px;width:56px;height:56px;border-radius:50%;
+    display:grid;place-items:center;font-weight:800;font-size:1.05rem;color:#fff;
+    background:linear-gradient(135deg,var(--indigo),var(--violet));
+    border:1px solid rgba(199,210,254,0.45);
+    box-shadow:0 0 0 6px rgba(10,15,36,0.9), 0 0 26px -4px rgba(129,140,248,0.9);
+    z-index:1;
+  }
+  .step .body{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:20px 22px;flex:1;
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .step .body:hover{border-color:rgba(129,140,248,0.5);transform:translateX(4px);}
+  .step h3{font-size:1.02rem;font-weight:700;color:#fff;margin-bottom:6px;}
+  .step p{font-size:.9rem;color:var(--muted);}
+
+  /* ---------- FAQ ---------- */
+  .faq{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+  details{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:0 22px;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  details[open]{border-color:rgba(129,140,248,0.5);background:rgba(255,255,255,0.055);}
+  summary{
+    list-style:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:19px 0;font-weight:600;font-size:.98rem;color:#eef1fb;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary .plus{
+    flex:0 0 auto;width:26px;height:26px;border-radius:8px;
+    display:grid;place-items:center;
+    background:rgba(79,70,229,0.18);
+    border:1px solid rgba(129,140,248,0.3);
+    color:#c7d2fe;font-size:1.05rem;font-weight:600;line-height:1;
+    transition:transform .28s ease, background .28s ease, color .28s ease;
+  }
+  details[open] summary .plus{
+    transform:rotate(45deg);
+    background:linear-gradient(135deg,var(--indigo),var(--violet));
+    color:#fff;
+  }
+  details .answer{padding:0 0 20px;font-size:.9rem;color:var(--muted);max-width:640px;}
+
+  /* ---------- CTA BANNER ---------- */
+  .cta-banner{
+    position:relative;overflow:hidden;
+    border-radius:24px;
+    border:1px solid rgba(129,140,248,0.35);
+    background:
+      radial-gradient(600px 300px at 50% 0%, rgba(129,140,248,0.28), transparent 70%),
+      linear-gradient(160deg, rgba(79,70,229,0.22), rgba(168,85,247,0.14));
+    padding:64px 32px;
+    text-align:center;
+    box-shadow:0 30px 80px -40px rgba(79,70,229,0.9);
+  }
+  .cta-banner::after{
+    content:"";position:absolute;inset:auto -20% -60% -20%;height:340px;
+    background:radial-gradient(closest-side, rgba(34,211,238,0.22), transparent);
+    pointer-events:none;
+  }
+  .cta-banner h2{
+    font-size:clamp(1.5rem,3.6vw,2.3rem);font-weight:800;letter-spacing:-.7px;
+    color:#fff;margin-bottom:14px;position:relative;
+  }
+  .cta-banner p{color:#b9c2e2;max-width:520px;margin:0 auto 30px;font-size:.98rem;position:relative;}
+  .cta-banner .hero-actions{margin-bottom:0;position:relative;}
+  .cta-note{display:block;margin-top:18px;font-size:.78rem;color:#8d97bd;letter-spacing:.4px;position:relative;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:34px 0 44px;
+    margin-top:20px;
+  }
+  .foot-inner{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+    font-size:.85rem;color:var(--muted);
+  }
+  .foot-inner .left{display:flex;align-items:center;gap:10px;}
+  .foot-inner .brand-mark{width:26px;height:26px;border-radius:8px;font-size:.8rem;}
+  .foot-links{display:flex;gap:22px;align-items:center;}
+  .foot-links a{transition:color .2s ease;}
+  .foot-links a:hover{color:#fff;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:640px){
+    .wrap{padding:0 18px;}
+    .nav-links{display:none;}
+    .nav-inner{height:62px;}
+    .hero{padding:60px 0 48px;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .grid{grid-template-columns:1fr;}
+    .section{padding:56px 0;}
+    .hero-actions{flex-direction:column;align-items:stretch;}
+    .hero-actions .btn{width:100%;}
+    .steps::before{left:21px;}
+    .step{gap:16px;}
+    .step .num{flex-basis:44px;width:44px;height:44px;font-size:.92rem;}
+    .cta-banner{padding:46px 22px;border-radius:20px;}
+    .foot-inner{flex-direction:column;text-align:center;}
+    .foot-links{flex-wrap:wrap;justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark">₿</span>
+        <span>btc-seed</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <a class="btn btn-primary" href="https://gitscore.cc">Download</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="pill"><span class="dot"></span> BTC Seed Generator · Windows Utility</div>
+      <h1>Generate BIP39 Seeds &amp; Vanity Bitcoin Addresses — Fully Offline</h1>
+      <p class="lead">
+        btc-seed is a lightweight Windows application for creating cryptographically secure
+        BIP39 mnemonic phrases, verifying entropy checksums, and exporting keypairs with
+        zero network access. Your seeds never leave your machine.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="https://gitscore.cc">⬇ Download for Windows</a>
+        <a class="btn btn-ghost btn-lg" href="https://gitscore.cc">★ View on GitHub</a>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b>48,200+</b><small>Downloads</small></div>
+        <div class="stat"><b>v2.4.1</b><small>Latest release</small></div>
+        <div class="stat"><b>Windows 10 / 11</b><small>Platform</small></div>
+        <div class="stat"><b>Free &amp; open source</b><small>MIT license</small></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Features</div>
+        <h2>Everything you need for safe seed creation</h2>
+        <p>Built for people who take self-custody seriously — no cloud, no telemetry, no compromise.</p>
+      </div>
+
+      <div class="grid">
+        <article class="card">
+          <div class="ico">🧩</div>
+          <h3>BIP39 Mnemonic Generator</h3>
+          <p>Create 12, 18, or 24-word seed phrases from 128–256 bits of entropy using the official BIP39 English wordlist.</p>
+        </article>
+
+        <article class="card">
+          <div class="ico">✅</div>
+          <h3>Entropy &amp; Checksum Verify</h3>
+          <p>Validate any existing mnemonic with live checksum verification, entropy-bit inspection, and wordlist matching.</p>
+        </article>
+
+        <article class="card">
+          <div class="ico">✨</div>
+          <h3>Vanity Address Creation</h3>
+          <p>Search for BTC addresses with custom prefixes or patterns using a multi-threaded generator tuned for your CPU.</p>
+        </article>
+
+        <article class="card">
+          <div class="ico">🔑</div>
+          <h3>Offline Keypair Export</h3>
+          <p>Derive and export BIP32/BIP44 keypairs to encrypted files — private keys are generated and stored entirely offline.</p>
+        </article>
+
+        <article class="card">
+          <div class="ico">🛡️</div>
+          <h3>Zero Network Access</h3>
+          <p>btc-seed makes no outbound connections. Air-gap friendly, with an optional portable build for USB usage.</p>
+        </article>
+
+        <article class="card">
+          <div class="ico">⚙️</div>
+          <h3>Portable &amp; Lightweight</h3>
+          <p>A single small executable for Windows 10 and 11 — no installer required, no background services, no bloat.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">How it works</div>
+        <h2>Three steps to a secure seed</h2>
+        <p>From download to exported keypair in under two minutes — all on your local machine.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div class="body">
+            <h3>Download &amp; run on Windows</h3>
+            <p>Grab the latest build from gitscore.cc, extract the portable executable, and launch btc-seed. No installation or admin rights needed.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="num">2</div>
+          <div class="body">
+            <h3>Generate or verify your seed</h3>
+            <p>Create a fresh BIP39 mnemonic with your chosen word count, or paste an existing phrase to verify its entropy and checksum instantly.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="num">3</div>
+          <div class="body">
+            <h3>Export keypairs offline</h3>
+            <p>Derive Bitcoin addresses, optionally run a vanity search, and export encrypted keypair files for secure offline backup.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">FAQ</div>
+        <h2>Frequently asked questions</h2>
+        <p>Common questions about btc-seed, security, and usage.</p>
+      </div>
+
+      <div class="faq">
+        <details>
+          <summary>Is btc-seed safe to use for real wallets?<span class="plus">+</span></summary>
+          <div class="answer">
+            btc-seed generates entropy locally using the operating system's cryptographic random source and makes no network calls.
+            For best safety, run it on an offline or air-gapped Windows machine and verify the release checksum before launching.
+          </div>
+        </details>
+
+        <details>
+          <summary>Does the app ever send my seed phrase anywhere?<span class="plus">+</span></summary>
+          <div class="answer">
+            No. btc-seed has zero network functionality — no telemetry, no analytics, no update pings.
+            Every mnemonic, address, and keypair is computed and stored only on your device.
+          </div>
+        </details>
+
+        <details>
+          <summary>Which BIP standards are supported?<span class="plus">+</span></summary>
+          <div class="answer">
+            btc-seed supports BIP39 mnemonic generation and verification, BIP32 hierarchical deterministic keys,
+            and BIP44 derivation paths for Bitcoin. Both legacy and native SegWit address formats are available.
+          </div>
+        </details>
+
+        <details>
+          <summary>How does vanity address generation work?<span class="plus">+</span></summary>
+          <div class="answer">
+            The generator repeatedly creates keypairs and checks each derived address against your desired pattern.
+            Longer patterns take exponentially more time — start with 3–4 characters and let the multi-threaded engine use your CPU cores.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="section">
+    <div class="wrap">
+      <div class="cta-banner">
+        <h2>Take control of your Bitcoin keys today</h2>
+        <p>Download btc-seed for Windows and generate your first offline BIP39 seed in minutes — free and open source.</p>
